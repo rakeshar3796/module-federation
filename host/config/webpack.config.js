@@ -26,6 +26,7 @@ const ForkTsCheckerWebpackPlugin =
     : require("react-dev-utils/ForkTsCheckerWebpackPlugin");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
+const InjectExternalsPlugin = require("./inject.external");
 
 const createEnvironmentHash = require("./webpack/persistentCache/createEnvironmentHash");
 
@@ -571,7 +572,7 @@ module.exports = function (webpackEnv) {
           type: "var",
           name: "host",
         },
-        filename: `mf/output.js`,
+        filename: `output.js`,
         exposes: {},
         remotes: ["remote1"],
         shared: [],
@@ -582,7 +583,9 @@ module.exports = function (webpackEnv) {
           {},
           {
             inject: true,
+            scriptLoading: "blocking",
             template: paths.appHtml,
+            externals: ["http://localhost:8000/output.js"],
           },
           isEnvProduction
             ? {
@@ -602,6 +605,7 @@ module.exports = function (webpackEnv) {
             : undefined
         )
       ),
+      new InjectExternalsPlugin(),
       // Inlines the webpack runtime script. This script is too small to warrant
       // a network request.
       // https://github.com/facebook/create-react-app/issues/5358
